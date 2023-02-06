@@ -6,8 +6,8 @@ import ChangingContent from './Components/ChangingContent'
 function App() {
   return (
     <div className="App">
-      {/* <ForcedLayoutExample></ForcedLayoutExample> */}
-      <ChangingContent></ChangingContent>
+      <ForcedLayoutExample></ForcedLayoutExample>
+      {/* <ChangingContent></ChangingContent> */}
     </div>
   );
 }
