@@ -1,3 +1,4 @@
+import React, { Ref, PropsWithChildren } from 'react'
 import { cx, css } from '@emotion/css'
 export const Toolbar = React.forwardRef(
     (
@@ -20,3 +21,75 @@ export const Toolbar = React.forwardRef(
     )
   )
   
+  export const Menu = React.forwardRef(
+    (
+      { className, ...props },ref
+    ) => (
+      <div
+        {...props}
+        ref={ref}
+        className={cx(
+          className,
+          css`
+            & > * {
+              display: inline-block;
+            }
+  
+            & > * + * {
+              margin-left: 15px;
+            }
+          `
+        )}
+      />
+    )
+  )
+  
+
+  export const Button = React.forwardRef(
+    (
+      {
+        className,
+        active,
+        reversed,
+        ...props
+      },
+      ref
+    ) => (
+      <span
+        {...props}
+        ref={ref}
+        className={cx(
+          className,
+          css`
+            cursor: pointer;
+            color: ${reversed
+              ? active
+                ? 'white'
+                : '#aaa'
+              : active
+              ? 'black'
+              : '#ccc'};
+          `
+        )}
+      />
+    )
+  )
+
+  export const Icon = React.forwardRef(
+    (
+      { className, ...props } ,ref
+    ) => (
+      <span
+        {...props}
+        ref={ref}
+        className={cx(
+          'material-icons',
+          className,
+          css`
+            font-size: 18px;
+            vertical-align: text-bottom;
+          `
+        )}
+      />
+    )
+  )
