@@ -9,8 +9,11 @@ import { Button, Icon, Toolbar } from './components'
 
 // Import the Slate components and React plugin.
 import { Slate, Editable, useSlate, withReact } from 'slate-react'
+import { ListType, withLists } from '@prezly/slate-lists';
+
 
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
+
 
 function BulletList() {
 
@@ -37,19 +40,17 @@ function BulletList() {
 }
 
 const Element = ({ attributes, children, element }) => {
+  debugger
   switch (element.type) {
     case 'bulleted-list':
       return <ul {...attributes}>{children}</ul>
-    case 'heading-one':
-      return <h1 {...attributes}>{children}</h1>
     case 'list-item':
       return <li {...attributes}>{children}</li>
-    case 'numbered-list':
-      return <ol {...attributes}>{children}</ol>
     default:
       return <p {...attributes}>{children}</p>
   }
 }
+
 
 const BlockButton = ({ format, icon }) => {
   const editor = useSlate()
@@ -57,7 +58,8 @@ const BlockButton = ({ format, icon }) => {
     <Button
       active={isBlockActive(editor, format)}
       onMouseDown={event => {
-        event.preventDefault()
+        event.preventDefault();
+        debugger;
         toggleBlock(editor, format)
       }}
     >
@@ -65,6 +67,8 @@ const BlockButton = ({ format, icon }) => {
     </Button>
   )
 }
+
+
 const toggleBlock = (editor, format) => {
   const isActive = isBlockActive(editor, format)
   const isList = LIST_TYPES.includes(format)
@@ -85,21 +89,6 @@ const toggleBlock = (editor, format) => {
     const block = { type: format, children: [] }
     Transforms.wrapNodes(editor, block)
   }
-
-  const isBlockActive = (editor, format) => {
-    const { selection } = editor
-    if (!selection) return false
-
-    const [match] = Array.from(
-      Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, selection),
-        match: n =>
-          !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === format,
-      })
-    )
-
-    return !!match
-  }
 }
 
 const isBlockActive = (editor, format) => {
@@ -117,4 +106,6 @@ const isBlockActive = (editor, format) => {
   return !!match
 }
 
-  export default BulletList
+
+
+export default BulletList
