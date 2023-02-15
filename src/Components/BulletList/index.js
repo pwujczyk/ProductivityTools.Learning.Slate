@@ -9,7 +9,7 @@ import { Button, Icon, Toolbar } from './components'
 
 // Import the Slate components and React plugin.
 import { Slate, Editable, useSlate, withReact } from 'slate-react'
-import { ListType, withLists } from '@prezly/slate-lists';
+import { ListType, withLists,withListsReact,onKeyDown } from '@prezly/slate-lists';
 
 
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
@@ -26,13 +26,15 @@ function BulletList() {
 
   const renderElement = useCallback(props => <Element {...props} />, [])
 
-  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
+  const editor = useMemo(() =>withListsReact(withListsPlugin(withHistory(withReact(createEditor())))), [])
   return (
     <Slate editor={editor} value={value} onChange={value => { setValue(value); }}>
       <Toolbar>
         <BlockButton format="bulleted-list" icon="format_list_bulleted" />
       </Toolbar>
       <Editable
+                onKeyDown={(event) => onKeyDown(editor, event)}
+
         renderElement={renderElement}
         placeholder="Enter some plain text..." />
     </Slate>
@@ -40,7 +42,7 @@ function BulletList() {
 }
 
 const Element = ({ attributes, children, element }) => {
-  debugger
+  
   switch (element.type) {
     case 'bulleted-list':
       return <ul {...attributes}>{children}</ul>
@@ -51,6 +53,51 @@ const Element = ({ attributes, children, element }) => {
   }
 }
 
+const Type ={
+  PARAGRAPH : 'paragraph',
+  ORDERED_LIST : 'ordered-list',
+  UNORDERED_LIST : 'bulleted-list',
+  LIST_ITEM :'list-item',
+  LIST_ITEM_TEXT : 'list-item-text',
+}
+
+
+const withListsPlugin = withLists({
+      isConvertibleToListTextNode(node) {
+          return SlateElement.isElementType(node, Type.PARAGRAPH);
+      },
+      isDefaultTextNode(node) {
+          return SlateElement.isElementType(node, Type.PARAGRAPH);
+    },
+      isListNode(node, type) {
+          if (type) {
+              return SlateElement.isElementType(node, type);
+          }
+          return (
+            SlateElement.isElementType(node, Type.ORDERED_LIST) ||
+            SlateElement.isElementType(node, Type.UNORDERED_LIST)
+          );
+      },
+      isListItemNode(node) {
+          return SlateElement.isElementType(node, Type.LIST_ITEM);
+      },
+      isListItemTextNode(node) {
+          return SlateElement.isElementType(node, Type.LIST_ITEM_TEXT);
+      },
+      createDefaultTextNode(props = {}) {
+          return { children: [{ text: '' }], ...props, type: Type.PARAGRAPH };
+      },
+      createListNode(type= ListType.UNORDERED, props = {}) {
+          const nodeType = type === ListType.ORDERED ? Type.ORDERED_LIST : Type.UNORDERED_LIST;
+          return { children: [{ text: '' }], ...props, type: nodeType };
+      },
+      createListItemNode(props = {}) {
+          return { children: [{ text: '' }], ...props, type: Type.LIST_ITEM };
+      },
+      createListItemTextNode(props = {}) {
+          return { children: [{ text: '' }], ...props, type: Type.LIST_ITEM_TEXT };
+      },
+  });
 
 const BlockButton = ({ format, icon }) => {
   const editor = useSlate()
@@ -59,7 +106,7 @@ const BlockButton = ({ format, icon }) => {
       active={isBlockActive(editor, format)}
       onMouseDown={event => {
         event.preventDefault();
-        debugger;
+        
         toggleBlock(editor, format)
       }}
     >
